@@ -7,6 +7,7 @@
 (defclass game ()
 	      ((name :reader name
 		     :initarg :name)
+	       
 	       (votes :accessor votes
 		      :initform 0)))
 
@@ -41,3 +42,37 @@
 	      (print-unreadable-object (object stream :type t)
 		(with-slots (name votes) object
 		  (format stream "name: ~s with ~d votes" name votes))))
+
+
+
+(defun start-server (port)
+  (start (make-instance 'easy-acceptor :port port)))
+
+(push (create-prefix-dispatcher "/retro-games.html"
+					     'retro-games)
+      *dispatch-table*)
+
+(defun retro-games ()
+	       (standard-page (:title "Retro Games")
+			       (:h1 "Top Retro games")
+			       (:p "Not ready")))
+
+
+(defmacro standard-page ((&key title) &body body)
+	    `(with-html-output-to-string
+	        (*standard-output* nil :prologue t :indent t)
+         	      (:html :lang "en"
+			(:head
+			 (:meta :charset "utf-8")
+			 (:title ,title)
+			 (:link :type "text/css"
+				:real "stylesheet"
+				:href "/retro.css"))
+			(:body
+			 (:div :id "header" 
+			       (:img :src "/logo/jpg"
+				     :alt "commodore 64"
+				     :class "logo")
+			       (:span :class "strapline"
+				      "vote on your favorite Retro Game"))
+			 ,@body))))
